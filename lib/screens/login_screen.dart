@@ -71,6 +71,9 @@ class _LoginForm extends StatelessWidget {
 
     return Form(
       key: loginFormProvider.formKey,
+      autovalidateMode: loginFormProvider.isFirstValidationPerformed
+        ? AutovalidateMode.onUserInteraction
+        : AutovalidateMode.disabled,
       child: Column(
         children: [
           TextFormField(
@@ -133,7 +136,9 @@ class _LoginForm extends StatelessWidget {
                 loginFormProvider.isLoading = false;
               },
             child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                alignment: Alignment.center,
                 child: Text(
                   loginFormProvider.isLoading
                     ? 'Espere...'

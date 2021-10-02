@@ -10,12 +10,14 @@ class CardContainer extends StatelessWidget {
     // final _screenSize = MediaQuery.of(context).size;
     final _squareSize = MediaQuery.of(context).size.width * 0.85;
 
-    return Container(
-      width: _squareSize,
-      height: _squareSize, // TODO: borrar
-      padding: const EdgeInsets.all(20),
-      decoration: _cardShape(),
-      child: child,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: _squareSize),
+      child: Container(
+        width: _squareSize,
+        padding: const EdgeInsets.all(20),
+        decoration: _cardShape(),
+        child: child,
+      ),
     );
   }
 

@@ -14,12 +14,19 @@ class MyApp extends StatelessWidget {
       title: 'Productos App',
       theme: ThemeData.light().copyWith(
         scaffoldBackgroundColor: Colors.grey[300],
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          color: Colors.indigo,
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.indigo,
+        )
       ),
       routes: {
         LoginScreen.routeName: (_) => const LoginScreen(),
         HomeScreen.routeName: (_) => const HomeScreen(),
       },
-      initialRoute: LoginScreen.routeName,
+      initialRoute: HomeScreen.routeName,
     );
   }
 }
