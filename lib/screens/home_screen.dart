@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:productosapp/screens/screens.dart';
 import 'package:productosapp/widgets/widgets.dart' show ProductCard;
+
+import 'package:productosapp/services/services.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -9,6 +13,10 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final productsService = Provider.of<ProductsService>(context);
+
+    if (productsService.isLoading) return const LoadingScreen();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Productos'),
@@ -16,9 +24,20 @@ class HomeScreen extends StatelessWidget {
       ),
       body: ListView.builder(
         physics: const BouncingScrollPhysics(),
-        itemCount: 10,
+        itemCount: productsService.products.length,
         itemBuilder: (context, index) {
-          return const ProductCard();
+          return GestureDetector(
+            // Se pueden pasar los datos a través de los argumentos
+            // Se hará a travésd del ProductService
+            onTap: () {
+              productsService.selectedProduct =
+                  productsService.products[index].copy();
+              Navigator.pushNamed(context, ProductScreen.routeName);
+            },
+            child: ProductCard(
+              product: productsService.products[index],
+            ),
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(
