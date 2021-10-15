@@ -5,7 +5,6 @@ import 'package:productosapp/models/models.dart';
 class ProductFormProvider extends ChangeNotifier {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   Product product;
-  bool isFirstValidationPerformed = false;
 
   ProductFormProvider({required this.product});
   // * El producto que mandamos debe ser una copia del mismo
@@ -19,8 +18,6 @@ class ProductFormProvider extends ChangeNotifier {
     // print(product.name);
     // print(product.price);
     // print(product.available);
-
-    if (!isFirstValidationPerformed) isFirstValidationPerformed = true;
 
     return formKey.currentState?.validate() ?? false;
     // Es posible que no se haya asignado a un widget, por eso en tal caso es false

@@ -108,9 +108,7 @@ class _ProductForm extends StatelessWidget {
       decoration: _containerBoxDecoration(),
       child: Form(
         key: productFormProvider.formKey,
-        autovalidateMode: productFormProvider.isFirstValidationPerformed
-            ? AutovalidateMode.onUserInteraction
-            : AutovalidateMode.disabled,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Column(
           children: [
             TextFormField(
