@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:productosapp/providers/product_form_provider.dart';
-
-import 'package:productosapp/widgets/widgets.dart' show ProductBgImage;
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'package:productosapp/screens/screens.dart' show HomeScreen;
+import 'package:productosapp/widgets/widgets.dart' show ProductBgImage;
 
 import 'package:productosapp/services/services.dart';
+import 'package:productosapp/providers/providers.dart';
 import 'package:productosapp/ui/input_decorations.dart';
-import 'package:productosapp/providers/product_form_provider.dart';
 
 class ProductScreen extends StatelessWidget {
   const ProductScreen({Key? key}) : super(key: key);
@@ -16,7 +17,28 @@ class ProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final productService = Provider.of<ProductsService>(context);
+    final productsService = Provider.of<ProductsService>(context);
+
+    return ChangeNotifierProvider(
+      create: (_) =>
+          ProductFormProvider(product: productsService.selectedProduct),
+      child: _ProductScreenScaffold(
+        productsService: productsService,
+      ),
+    );
+  }
+}
+
+class _ProductScreenScaffold extends StatelessWidget {
+  const _ProductScreenScaffold({
+    Key? key,
+    required this.productsService,
+  }) : super(key: key);
+
+  final ProductsService productsService;
+
+  @override
+  Widget build(BuildContext context) {
     final productFormProvider = Provider.of<ProductFormProvider>(context);
 
     return Scaffold(
@@ -33,30 +55,78 @@ class ProductScreen extends StatelessWidget {
               child: Stack(
                 children: [
                   ProductBgImage(
-                    imgUrl: productService.selectedProduct.picture,
+                    imgUrl: productsService.selectedProduct.picture,
                   ),
                   Positioned(
                     top: 10,
                     left: 5,
                     child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(
+                      onPressed: productsService.isSaving
+                          ? null
+                          : () => Navigator.of(context).pop(),
+                      icon: Icon(
                         Icons.arrow_back_ios_new,
-                        color: Colors.white,
+                        color: productsService.isSaving
+                            ? Colors.white10
+                            : Colors.white,
                         size: 28,
                       ),
                     ),
                   ),
                   Positioned(
                     top: 10,
+                    right: 40,
+                    child: IconButton(
+                      onPressed: productsService.isSaving
+                          ? null
+                          : () async {
+                              final _imagePicker = ImagePicker();
+                              final XFile? pickedFile =
+                                  await _imagePicker.pickImage(
+                                source: ImageSource.camera,
+                                // imageQuality: 100,
+                              );
+
+                              if (pickedFile == null) return;
+
+                              // print('Image guardada en: ${pickedFile.path}');
+                              productsService
+                                  .updateSelectedProductImage(pickedFile.path);
+                            },
+                      icon: Icon(
+                        Icons.camera_alt_outlined,
+                        color: productsService.isSaving
+                            ? Colors.white10
+                            : Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
                     right: 5,
                     child: IconButton(
-                      onPressed: () {
-                        // TODO: abrir cámara o galería
-                      },
-                      icon: const Icon(
-                        Icons.camera_alt_outlined,
-                        color: Colors.white,
+                      onPressed: productsService.isSaving
+                          ? null
+                          : () async {
+                              final _imagePicker = ImagePicker();
+                              final XFile? pickedFile =
+                                  await _imagePicker.pickImage(
+                                source: ImageSource.gallery,
+                                // imageQuality: 100,
+                              );
+
+                              if (pickedFile == null) return;
+
+                              // print('Image guardada en: ${pickedFile.path}');
+                              productsService
+                                  .updateSelectedProductImage(pickedFile.path);
+                            },
+                      icon: Icon(
+                        Icons.add_photo_alternate_outlined,
+                        color: productsService.isSaving
+                            ? Colors.white10
+                            : Colors.white,
                         size: 28,
                       ),
                     ),
@@ -64,16 +134,33 @@ class ProductScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const _ProductForm(),
+            _ProductForm(
+              productsService: productsService,
+            ),
             const SizedBox(height: 100),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          productFormProvider.isValidForm();
-        },
-        child: const Icon(Icons.save_outlined),
+        onPressed: productsService.isSaving
+            ? null
+            : () async {
+                if (!productFormProvider.isValidForm()) return;
+
+                final String? imageUrl = await productsService.uploadImage();
+
+                // print('imageUrl: $imageUrl');
+                if (imageUrl != null) {
+                  productFormProvider.product.picture = imageUrl;
+                }
+
+                productsService
+                    .saveOrCreateProduct(productFormProvider.product);
+                Navigator.pushNamed(context, HomeScreen.routeName);
+              },
+        child: productsService.isSaving
+            ? const CircularProgressIndicator(color: Colors.white)
+            : const Icon(Icons.save_outlined),
       ),
     );
   }
@@ -94,7 +181,12 @@ class ProductScreen extends StatelessWidget {
 }
 
 class _ProductForm extends StatelessWidget {
-  const _ProductForm({Key? key}) : super(key: key);
+  const _ProductForm({
+    Key? key,
+    required this.productsService,
+  }) : super(key: key);
+
+  final ProductsService productsService;
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +205,7 @@ class _ProductForm extends StatelessWidget {
           children: [
             TextFormField(
               initialValue: product.name,
+              enabled: !productsService.isSaving,
               onChanged: (newValue) => product.name = newValue,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -120,7 +213,7 @@ class _ProductForm extends StatelessWidget {
                 }
               },
               decoration: InputDecorations.authInputDecoration(
-                hintText: 'Lámpara',
+                hintText: 'Nombre del producto',
                 labelText: 'Nombre:',
               ),
             ),
@@ -129,6 +222,7 @@ class _ProductForm extends StatelessWidget {
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
               ],
+              enabled: !productsService.isSaving,
               onChanged: (newValue) {
                 double.tryParse(newValue) == null
                     ? product.price = 0
@@ -150,7 +244,9 @@ class _ProductForm extends StatelessWidget {
               title: const Text('Disponible:'),
               activeColor: Colors.indigo,
               value: product.available,
-              onChanged: productFormProvider.updateAvailability,
+              onChanged: productsService.isSaving
+                  ? null
+                  : productFormProvider.updateAvailability,
             ),
           ],
         ),

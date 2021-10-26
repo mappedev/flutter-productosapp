@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:productosapp/providers/product_form_provider.dart';
 import 'package:provider/provider.dart';
 
 import 'package:productosapp/screens/screens.dart';
@@ -19,9 +18,6 @@ class AppState extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => productsService),
-        ChangeNotifierProvider(create: (_) {
-          return ProductFormProvider(product: productsService.selectedProduct);
-        }),
       ],
       child: const MyApp(),
     );
