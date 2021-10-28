@@ -84,6 +84,8 @@ class _ProductScreenScaffold extends StatelessWidget {
                               final XFile? pickedFile =
                                   await _imagePicker.pickImage(
                                 source: ImageSource.camera,
+                                maxWidth: 640,
+                                maxHeight: 800,
                                 // imageQuality: 100,
                               );
 
@@ -113,6 +115,8 @@ class _ProductScreenScaffold extends StatelessWidget {
                               final XFile? pickedFile =
                                   await _imagePicker.pickImage(
                                 source: ImageSource.gallery,
+                                maxWidth: 640,
+                                maxHeight: 800,
                                 // imageQuality: 100,
                               );
 
@@ -156,7 +160,7 @@ class _ProductScreenScaffold extends StatelessWidget {
 
                 productsService
                     .saveOrCreateProduct(productFormProvider.product);
-                Navigator.pushNamed(context, HomeScreen.routeName);
+                Navigator.of(context).pop();
               },
         child: productsService.isSaving
             ? const CircularProgressIndicator(color: Colors.white)
