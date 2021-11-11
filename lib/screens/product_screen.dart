@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:productosapp/screens/screens.dart' show HomeScreen;
 import 'package:productosapp/widgets/widgets.dart' show ProductBgImage;
 
 import 'package:productosapp/services/services.dart';

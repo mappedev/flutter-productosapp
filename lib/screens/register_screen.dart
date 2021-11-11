@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:productosapp/services/services.dart';
 import 'package:provider/provider.dart';
 
 import 'package:productosapp/screens/screens.dart';
 import 'package:productosapp/widgets/widgets.dart';
 
-import 'package:productosapp/services/services.dart';
 import 'package:productosapp/providers/providers.dart';
 import 'package:productosapp/ui/input_decorations.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
-  static const routeName = 'login';
+  static const routeName = 'register';
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +35,12 @@ class LoginScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Text(
-                        'Login',
+                        'Crear cuenta',
                         style: Theme.of(context).textTheme.headline5,
                       ),
                       ChangeNotifierProvider(
                         create: (_) => LoginFromProvider(),
-                        child: const _LoginForm(),
+                        child: const _RegisterForm(),
                       ),
                     ],
                   ),
@@ -54,10 +55,10 @@ class LoginScreen extends StatelessWidget {
                 ),
                 onPressed: () => Navigator.pushReplacementNamed(
                   context,
-                  RegisterScreen.routeName,
+                  LoginScreen.routeName,
                 ),
                 child: const Text(
-                  'Crear cuenta',
+                  'Ya tengo una cuenta',
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.black87,
@@ -73,8 +74,8 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class _LoginForm extends StatelessWidget {
-  const _LoginForm({Key? key}) : super(key: key);
+class _RegisterForm extends StatelessWidget {
+  const _RegisterForm({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +144,7 @@ class _LoginForm extends StatelessWidget {
 
                     loginFormProvider.isLoading = true;
 
-                    final String? errorMessage = await authService.login(
+                    final String? errorMessage = await authService.createUser(
                       loginFormProvider.email,
                       loginFormProvider.password,
                     );
@@ -152,16 +153,17 @@ class _LoginForm extends StatelessWidget {
                       late String message;
 
                       switch (errorMessage) {
-                        case 'EMAIL_NOT_FOUND':
-                          message = 'Correo inválido';
+                        case 'EMAIL_EXISTS':
+                          message = 'El correo ya existe';
                           break;
 
-                        case 'INVALID_PASSWORD':
-                          message = 'Contraseña inválida';
+                        case 'OPERATION_NOT_ALLOWED':
+                          message = 'Acceso deshabilitado';
                           break;
 
-                        case 'USER_DISABLED':
-                          message = 'Usuario deshabilitado';
+                        case 'TOO_MANY_ATTEMPTS_TRY_LATER':
+                          message =
+                              'Acceso bloqueado por actividad inusual, por favor intente más tarde';
                           break;
 
                         default:

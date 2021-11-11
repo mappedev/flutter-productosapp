@@ -5,19 +5,25 @@ import 'package:provider/provider.dart';
 import 'package:productosapp/screens/screens.dart';
 
 import 'package:productosapp/services/services.dart';
+import 'package:productosapp/secure_storage.dart';
 
-void main() => runApp(const AppState());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await SecureStorage.initSecureStorage();
+
+  runApp(const AppState());
+}
 
 class AppState extends StatelessWidget {
   const AppState({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final productsService = ProductsService();
-
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => productsService),
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ProductsService()),
       ],
       child: const MyApp(),
     );
@@ -38,6 +44,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: NotificationsService.messengerKey,
       title: 'Productos App',
       theme: ThemeData.light().copyWith(
           scaffoldBackgroundColor: Colors.grey[300],
@@ -50,10 +57,13 @@ class MyApp extends StatelessWidget {
           )),
       routes: {
         LoginScreen.routeName: (_) => const LoginScreen(),
+        RegisterScreen.routeName: (_) => const RegisterScreen(),
         HomeScreen.routeName: (_) => const HomeScreen(),
         ProductScreen.routeName: (_) => const ProductScreen(),
       },
-      initialRoute: HomeScreen.routeName,
+      initialRoute: SecureStorage.idToken.isEmpty
+          ? LoginScreen.routeName
+          : HomeScreen.routeName,
     );
   }
 }

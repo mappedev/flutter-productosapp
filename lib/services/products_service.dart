@@ -1,17 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:productosapp/models/models.dart';
-
-const String baseUrl = 'flutter-fh-courses-default-rtdb.firebaseio.com';
+import 'package:productosapp/secure_storage.dart';
 
 class ProductsService extends ChangeNotifier {
   ProductsService() {
     loadProducts();
   }
+
+  final String _baseUrl = 'flutter-fh-courses-default-rtdb.firebaseio.com';
 
   List<Product> products = [];
   late Product selectedProduct;
@@ -20,7 +20,9 @@ class ProductsService extends ChangeNotifier {
   File? newPictureFile;
 
   Future<Map<String, dynamic>?> getProducts() async {
-    final url = Uri.https(baseUrl, 'products.json');
+    final url = Uri.https(_baseUrl, 'products.json', {
+      'auth': SecureStorage.idToken,
+    });
 
     final res = await http.get(url);
     final Map<String, dynamic>? data = json.decode(res.body);
@@ -88,7 +90,7 @@ class ProductsService extends ChangeNotifier {
   }
 
   Future<String> createProduct(Product product) async {
-    final url = Uri.https(baseUrl, 'products.json');
+    final url = Uri.https(_baseUrl, 'products.json');
 
     final res = await http.post(url, body: product.toJson());
     final decodedData = json.decode(res.body);
@@ -100,7 +102,7 @@ class ProductsService extends ChangeNotifier {
   }
 
   Future<String> updateProduct(Product product) async {
-    final url = Uri.https(baseUrl, 'products/${product.id}.json');
+    final url = Uri.https(_baseUrl, 'products/${product.id}.json');
 
     await http.put(url, body: product.toJson());
 
@@ -149,7 +151,7 @@ class ProductsService extends ChangeNotifier {
   }
 
   void removeProduct(String productId) async {
-    final url = Uri.https(baseUrl, 'products/${productId}.json');
+    final url = Uri.https(_baseUrl, 'products/$productId.json');
     await http.delete(url);
 
     products.removeWhere((product) => product.id == productId);
