@@ -90,7 +90,9 @@ class ProductsService extends ChangeNotifier {
   }
 
   Future<String> createProduct(Product product) async {
-    final url = Uri.https(_baseUrl, 'products.json');
+    final url = Uri.https(_baseUrl, 'products.json', {
+      'auth': SecureStorage.idToken,
+    });
 
     final res = await http.post(url, body: product.toJson());
     final decodedData = json.decode(res.body);
@@ -102,7 +104,9 @@ class ProductsService extends ChangeNotifier {
   }
 
   Future<String> updateProduct(Product product) async {
-    final url = Uri.https(_baseUrl, 'products/${product.id}.json');
+    final url = Uri.https(_baseUrl, 'products/${product.id}.json', {
+      'auth': SecureStorage.idToken,
+    });
 
     await http.put(url, body: product.toJson());
 
@@ -151,7 +155,9 @@ class ProductsService extends ChangeNotifier {
   }
 
   void removeProduct(String productId) async {
-    final url = Uri.https(_baseUrl, 'products/$productId.json');
+    final url = Uri.https(_baseUrl, 'products/$productId.json', {
+      'auth': SecureStorage.idToken,
+    });
     await http.delete(url);
 
     products.removeWhere((product) => product.id == productId);
